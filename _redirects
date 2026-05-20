@@ -1,1 +1,7 @@
+# Canonicalize: send the bare Netlify production subdomain to the custom domain.
+# Branch/preview hosts (e.g. seo-basics--snazzy-scone-c93ecb.netlify.app) have a
+# different host and are unaffected by this rule.
+https://snazzy-scone-c93ecb.netlify.app/*   https://whatifweaver.com/:splat   301!
+
+# Clean URL for the download page.
 /download   /download.html   200
