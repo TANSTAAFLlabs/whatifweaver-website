@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — What-If Weaver</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="canonical" href="https://whatifweaver.com/privacy.html" />
+  <link rel="icon" type="image/png" href="./assets/icon.png" />
+  <link rel="apple-touch-icon" href="./assets/icon.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Syne:wght@400;500;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #080b12;
+      --bg-2:        #0d1120;
+      --bg-3:        #131926;
+      --gold:        #fbbf24;
+      --text:        #e4dfd8;
+      --text-2:      #9a9490;
+      --text-3:      #50504d;
+      --border:      rgba(255,255,255,0.07);
+      --border-gold: rgba(251,191,36,0.22);
+      --r:           10px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Syne', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(251,191,36,0.05) 1px, transparent 1px);
+      background-size: 44px 44px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    a { color: var(--gold); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ─── NAV ─────────────────────────────────── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 44px;
+      background: rgba(8,11,18,.92);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: -.02em;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .logo:hover { text-decoration: none; }
+
+    .logo-icon {
+      width: 30px; height: 30px;
+      background: var(--gold);
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      font-size: 15px;
+    }
+
+    .nav-back {
+      font-size: 13px;
+      color: var(--text-3);
+      font-weight: 500;
+      transition: color .2s;
+    }
+    .nav-back:hover { color: var(--text-2); text-decoration: none; }
+
+    /* ─── PAGE ────────────────────────────────── */
+    .page {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 80px 40px 120px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ─── HEADER ──────────────────────────────── */
+    .doc-header {
+      margin-bottom: 56px;
+      padding-bottom: 40px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .doc-kicker {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 16px;
+    }
+
+    .doc-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: clamp(40px, 5vw, 60px);
+      letter-spacing: -.02em;
+      line-height: 1.05;
+      margin-bottom: 20px;
+    }
+
+    .doc-meta {
+      font-size: 13px;
+      color: var(--text-3);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ─── CONTENT ─────────────────────────────── */
+    .doc-section {
+      margin-bottom: 48px;
+    }
+
+    .doc-section h2 {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 16px;
+    }
+
+    .doc-section p {
+      font-size: 15px;
+      color: var(--text-2);
+      line-height: 1.8;
+      margin-bottom: 14px;
+    }
+
+    .doc-section p:last-child { margin-bottom: 0; }
+
+    .doc-section p strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .doc-section ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .doc-section ul li {
+      font-size: 15px;
+      color: var(--text-2);
+      line-height: 1.7;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .doc-section ul li::before {
+      content: '—';
+      color: var(--text-3);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* Plain list (no dashes) */
+    .doc-section ul.plain li::before { display: none; }
+    .doc-section ul.plain li { padding-left: 0; }
+
+    .doc-section a {
+      color: var(--gold);
+    }
+
+    /* Summary box */
+    .summary-box {
+      background: var(--bg-2);
+      border: 1px solid var(--border-gold);
+      border-radius: var(--r);
+      padding: 28px 32px;
+      margin-bottom: 48px;
+      position: relative;
+      overflow: hidden;
+    }
+    .summary-box::before {
+      content: '';
+      position: absolute;
+      inset: 0 0 auto;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold) 50%, transparent);
+    }
+    .summary-box p {
+      font-size: 15px;
+      color: var(--text-2);
+      line-height: 1.8;
+      margin: 0;
+    }
+    .summary-box p strong { color: var(--text); font-weight: 600; }
+
+    /* ─── FOOTER ──────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 32px 44px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+      color: var(--text-3);
+      position: relative;
+      z-index: 1;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .footer-tagline { font-size: 11px; color: var(--text-3); letter-spacing: .03em; }
+    .footer-right { display: flex; align-items: center; gap: 20px; }
+    footer a { color: var(--text-3); }
+    footer a:hover { color: var(--text-2); text-decoration: none; }
+
+    @media (max-width: 680px) {
+      nav { padding: 14px 24px; }
+      .page { padding: 60px 24px 100px; }
+      footer { flex-direction: column; gap: 12px; padding: 28px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">
+    <img src="./assets/icon.png" style="width:30px;height:30px;border-radius:8px;display:block" alt="What-If Weaver icon" />
+    What-If Weaver
+  </a>
+  <a href="/" class="nav-back">← Back to whatifweaver.com</a>
+</nav>
+
+<div class="page">
+
+  <div class="doc-header">
+    <p class="doc-kicker">TANSTAAFL Labs</p>
+    <h1 class="doc-title">Privacy Policy</h1>
+    <!-- TODO: update date before launch -->
+    <p class="doc-meta">Last updated: May 2026</p>
+  </div>
+
+  <div class="summary-box">
+    <p>What-If Weaver is a desktop application that runs on your device. <strong>The short version: we have very little of your data because almost none of it ever leaves your computer.</strong> Your financial scenarios, account balances, and projections are stored locally and never transmitted anywhere.</p>
+  </div>
+
+  <div class="doc-section">
+    <h2>What We Collect</h2>
+    <p><strong>When you purchase a license:</strong></p>
+    <ul>
+      <li>Your email address, used for license key delivery and update notifications</li>
+      <li>Payment information, processed by LemonSqueezy — we never see your credit card details</li>
+      <li>Your country, for tax compliance purposes</li>
+    </ul>
+    <p><strong>When you use the app:</strong></p>
+    <ul>
+      <li>Your license key is verified against LemonSqueezy's servers on first activation and periodically (approximately once per month) to confirm its validity</li>
+      <li>No financial data, scenarios, projections, or personal information is transmitted during this verification</li>
+    </ul>
+  </div>
+
+  <div class="doc-section">
+    <h2>What We Don't Collect</h2>
+    <p>We do not collect:</p>
+    <ul>
+      <li>Your financial scenarios, account balances, income, expenses, or any numbers you enter into the app</li>
+      <li>Usage telemetry, analytics, or behavioral data of any kind</li>
+      <li>Your IP address beyond what is inherent in any network request</li>
+      <li>Cookies, beyond what your browser uses on this website</li>
+    </ul>
+  </div>
+
+  <div class="doc-section">
+    <h2>Where Your Data Lives</h2>
+    <p>All financial data you enter into What-If Weaver is stored on your local device. We have no copy of it. We cannot access it. If you uninstall the app and delete your data folder, the data is gone — we cannot recover it for you.</p>
+    <p>You can export your data at any time using File → Export from within the app. The exported <code>.whatifweaver</code> file is yours to keep, back up, or transfer.</p>
+  </div>
+
+  <div class="doc-section">
+    <h2>Third Parties</h2>
+    <p>Two third parties interact with your data:</p>
+    <ul>
+      <li><strong>LemonSqueezy</strong> processes your payment and handles license key issuance and verification. They store associated purchase information per <a href="https://www.lemonsqueezy.com/privacy" target="_blank" rel="noopener">their privacy policy</a>.</li>
+      <li><strong>A transactional email provider</strong> delivers your license key and any update notifications to your email address.</li>
+    </ul>
+    <p>We do not sell, rent, or share your information with advertisers, data brokers, or any other third parties.</p>
+  </div>
+
+  <div class="doc-section">
+    <h2>Your Rights</h2>
+    <p>You may:</p>
+    <ul>
+      <li>Request a copy of any data we hold about you — your email address and license records</li>
+      <li>Request deletion of your account and associated data. Note that this will disable future license verification, effectively deactivating your copy of the app.</li>
+      <li>Opt out of update notification emails at any time by contacting us</li>
+    </ul>
+    <p>To exercise any of these rights, contact us at <a href="mailto:hello@whatifweaver.com">hello@whatifweaver.com</a>.</p>
+  </div>
+
+  <div class="doc-section">
+    <h2>This Website</h2>
+    <p>Whatifweaver.com is a static marketing site. We do not run analytics, advertising scripts, or tracking pixels on it. Standard server logs may record IP addresses and request data as part of normal web hosting operation; these are not used for profiling or targeted advertising.</p>
+  </div>
+
+  <div class="doc-section">
+    <h2>Changes to This Policy</h2>
+    <p>If we make material changes to this policy, we will update the date at the top of this page and notify existing customers by email.</p>
+  </div>
+
+  <div class="doc-section">
+    <h2>Governing Law</h2>
+    <p>This privacy policy is governed by the laws of the State of New Hampshire, United States.</p>
+  </div>
+
+  <div class="doc-section">
+    <h2>Contact</h2>
+    <p>Questions about this policy: <a href="mailto:hello@whatifweaver.com">hello@whatifweaver.com</a></p>
+    <p>TANSTAAFL Labs<br>New Hampshire, United States</p>
+  </div>
+
+</div>
+
+<footer>
+  <div>
+    <div class="logo" style="font-size:13px; margin-bottom:4px">
+      <img src="./assets/icon.png" style="width:24px;height:24px;border-radius:6px;display:block" alt="" />
+      What-If Weaver
+    </div>
+    <span class="footer-tagline">© 2026 TANSTAAFL Labs — There Ain't No Such Thing As A Free Lunch</span>
+  </div>
+  <div class="footer-right">
+    <img src="./assets/tanstaafl-labs.png" style="height:36px;opacity:0.45;display:block" alt="TANSTAAFL Labs" />
+    <a href="/">Home</a>
+    <span style="color:var(--border)">·</span>
+    <a href="mailto:hello@whatifweaver.com">Contact</a>
+  </div>
+</footer>
+
+</body>
+</html>

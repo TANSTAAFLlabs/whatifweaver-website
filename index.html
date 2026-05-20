@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>What-If Weaver — Personal Financial Scenario Planner for Windows</title>
+  <meta name="description" content="Model any financial decision before you make it. What-If Weaver runs decade-long projections on buying a house, changing jobs, retiring early, and more. $29, one-time, Windows." />
+
+  <link rel="canonical" href="https://whatifweaver.com/" />
+  <link rel="icon" type="image/png" href="./assets/icon.png" />
+  <link rel="apple-touch-icon" href="./assets/icon.png" />
+
+  <meta property="og:title" content="What-If Weaver — Personal Financial Scenario Planner" />
+  <meta property="og:description" content="Model any financial decision before you make it. Projections across decades, 500 Monte Carlo simulations per run, entirely on your machine. $29, one-time." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://whatifweaver.com/" />
+  <meta property="og:image" content="https://whatifweaver.com/assets/og-preview.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="What-If Weaver — Personal Financial Scenario Planner" />
+  <meta name="twitter:description" content="Model any financial decision before you make it. $29, one-time, Windows." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      /* Art Deco palette — mirrors desktop app palettes.ts (Art Deco theme).
+         Same variable names so cross-repo audits via grep stay cheap. */
+      --color-base: #060c1a;
+      --color-dark: #0A1628;
+      --color-surface: #0F1F3A;
+      --color-border: #D4AF37;
+      --color-subtle: #2a3a55;
+      --color-muted: #8a9ab5;
+      --color-mid: #c8a96e;
+      --color-light: #EAE4D3;
+      --color-white: #F5F0E1;
+      --color-green: #4ade80;
+      --color-red: #f87171;
+      --color-blue: #60a5fa;
+      --color-yellow: #D4AF37;
+      --color-orange: #c96520;
+      --color-purple: #a78bfa;
+      --color-cyan: #67e8f9;
+      --color-indigo: #D4AF37;
+
+      /* Type stack — Art Deco display + neutral body */
+      --font-display: 'Cinzel', 'Times New Roman', Georgia, serif;
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+    body { font-family:var(--font-body); background:var(--color-dark); color:var(--color-light); line-height:1.65; overflow-x:hidden; }
+    body::before {
+      content:''; position:fixed; inset:0;
+      background-image:radial-gradient(circle,rgba(212,175,55,0.04) 1px,transparent 1px);
+      background-size:44px 44px; pointer-events:none; z-index:0;
+    }
+
+    /* Section background rhythm per Art Deco brief: alternating dark/surface, deepest at footer/pricing/final-cta/Mycroft. */
+    .engines-bar, .scenarios { background:var(--color-surface); }
+    .mycroft-section, .pricing, .final-cta, footer { background:var(--color-base); }
+    a { color:inherit; text-decoration:none; }
+    em { font-style:italic; }
+    code { font-family:'JetBrains Mono',monospace; font-size:.88em; background:var(--color-base); border:1px solid var(--color-subtle); border-radius:0; padding:1px 6px; color:var(--color-yellow); }
+
+    .container { max-width:1120px; margin:0 auto; padding:0 40px; }
+    .container-wide { max-width:1280px; margin:0 auto; padding:0 40px; }
+    section { position:relative; z-index:1; }
+
+    /* Buttons — Art Deco: gold fill, sharp corners (no border-radius), uppercase display face */
+    .btn-primary { display:inline-flex; align-items:center; gap:12px; background:var(--color-border); color:var(--color-dark); font-family:var(--font-display); font-weight:500; font-size:16px; letter-spacing:.08em; text-transform:uppercase; padding:14px 36px; border-radius:0; border:1px solid var(--color-border); cursor:pointer; transition:background .2s,color .2s; text-decoration:none; }
+    .btn-primary:hover { background:var(--color-white); color:var(--color-base); }
+    .btn-primary .price-badge { font-family:var(--font-body); font-size:12px; font-weight:500; letter-spacing:0; text-transform:none; background:rgba(0,0,0,.18); border:1px solid rgba(0,0,0,.25); border-radius:0; padding:3px 9px; }
+
+    /* Nav — Art Deco: navy w/ gold rule, gold icon + cream wordmark, gold-fill sharp-corner CTA */
+    nav { position:fixed; inset:0 0 auto; z-index:100; display:flex; align-items:center; justify-content:space-between; padding:22px 44px; transition:padding .3s,background .3s,border-color .3s; border-bottom:1px solid var(--color-border); background:transparent; }
+    nav.scrolled { background:rgba(10,22,40,.95); backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px); padding:14px 44px; }
+    .logo { display:flex; align-items:center; gap:12px; font-family:var(--font-display); font-weight:500; font-size:17px; letter-spacing:.04em; color:var(--color-white); }
+    .btn-nav { background:var(--color-border); color:var(--color-dark); font-family:var(--font-display); font-weight:500; font-size:13px; letter-spacing:.08em; text-transform:uppercase; padding:10px 22px; border-radius:0; border:1px solid var(--color-border); cursor:pointer; transition:background .2s,color .2s; }
+    .btn-nav:hover { background:var(--color-white); color:var(--color-base); }
+
+    /* Hero — Art Deco: bare eyebrow, monumental Cinzel H1, italic body sub-copy */
+    .hero { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:148px 40px 80px; overflow:hidden; }
+    .hero::after { content:''; position:absolute; top:15%; left:50%; transform:translateX(-50%); width:780px; height:440px; background:radial-gradient(ellipse,rgba(212,175,55,.07) 0%,transparent 68%); pointer-events:none; }
+    .hero-kicker { font-family:var(--font-display); font-size:14px; font-weight:500; letter-spacing:.15em; text-transform:uppercase; color:var(--color-mid); margin-bottom:40px; animation:fadeUp .65s ease both; }
+    .kicker-dot { display:none; }
+    .hero h1 { font-family:var(--font-display); font-weight:600; font-size:clamp(40px,6vw,64px); letter-spacing:.02em; line-height:1.1; max-width:920px; color:var(--color-white); animation:fadeUp .65s .1s ease both; }
+    .hero h1 em { font-style:italic; font-weight:500; color:var(--color-yellow); }
+
+    .whatif-stack { display:flex; flex-direction:column; align-items:center; gap:4px; margin:36px auto 0; max-width:720px; animation:fadeUp .65s .15s ease both; }
+    .whatif-stack span { font-family:var(--font-body); font-style:italic; font-weight:400; font-size:clamp(15px,1.5vw,18px); color:var(--color-light); letter-spacing:0; line-height:1.55; }
+    .mycroft-tagline { margin-top:36px; font-family:var(--font-body); font-style:italic; font-size:17px; color:var(--color-light); line-height:1.7; max-width:640px; animation:fadeUp .65s .25s ease both; }
+    .mycroft-tagline strong { font-style:normal; color:var(--color-white); font-weight:500; }
+
+    .hero-cta-row { display:flex; align-items:center; flex-wrap:wrap; gap:18px; justify-content:center; margin-top:44px; animation:fadeUp .65s .3s ease both; }
+    .hero-meta { font-family:var(--font-display); font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--color-muted); font-weight:500; }
+
+    .preview-wrap { width:100%; max-width:1000px; margin:72px auto 0; animation:fadeUp .8s .45s ease both; position:relative; }
+    .preview-wrap::after { content:''; position:absolute; bottom:-40px; left:10%; right:10%; height:80px; background:radial-gradient(ellipse,rgba(212,175,55,.08) 0%,transparent 70%); pointer-events:none; }
+    /* App-frame: museum-exhibit gold border around the hero screenshot */
+    .app-frame { background:var(--color-surface); border:1px solid var(--color-border); border-radius:0; overflow:hidden; padding:4px; cursor:zoom-in; transition:border-color .25s; }
+    .app-frame:hover { border-color:var(--color-white); }
+    .window-bar { background:var(--color-base); border-bottom:1px solid var(--color-border); padding:11px 18px; display:flex; align-items:center; gap:8px; }
+    .dot { display:none; }
+    .window-title { font-family:var(--font-display); font-size:11px; font-weight:500; letter-spacing:.12em; text-transform:uppercase; color:var(--color-mid); margin:0 auto; }
+    .app-screenshot { display:block; width:100%; height:auto; }
+
+    /* Engines — Mycroft (deterministic) + Catapult (stochastic) side-by-side, gold-ruled band */
+    .engines-bar { padding:96px 0; border-top:1px solid var(--color-border); border-bottom:1px solid var(--color-border); position:relative; z-index:1; }
+    .engines-bar .sec-header { margin-bottom:56px; }
+    .engines-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:32px; max-width:1000px; margin:0 auto; }
+    .engine-card { background:var(--color-dark); border:1px solid var(--color-border); padding:40px 36px; position:relative; }
+    .engine-tag { font-family:var(--font-display); font-size:13px; font-weight:500; letter-spacing:.15em; text-transform:uppercase; color:var(--color-mid); margin-bottom:14px; }
+    .engine-name { font-family:var(--font-display); font-weight:600; font-size:48px; color:var(--color-border); margin-bottom:8px; line-height:1; letter-spacing:.02em; }
+    .engine-subtitle { font-family:var(--font-display); font-style:italic; font-size:18px; font-weight:400; color:var(--color-white); margin-bottom:22px; line-height:1.3; }
+    .engine-body { font-family:var(--font-body); font-size:15px; color:var(--color-light); line-height:1.7; }
+
+    /* Section header — Art Deco: Cinzel eyebrow, Cinzel display H2, Inter sub */
+    .sec-header { text-align:center; margin-bottom:72px; }
+    .sec-kicker { font-family:var(--font-display); font-size:14px; font-weight:500; letter-spacing:.15em; text-transform:uppercase; color:var(--color-mid); margin-bottom:18px; }
+    .sec-title { font-family:var(--font-display); font-weight:500; font-size:clamp(28px,4vw,40px); letter-spacing:.015em; line-height:1.15; color:var(--color-white); }
+    .sec-sub { font-family:var(--font-body); font-size:17px; color:var(--color-light); max-width:620px; margin:24px auto 0; line-height:1.7; }
+
+    /* Features bento — Art Deco: surface cards, slate borders, gold on hover, sharp corners */
+    .features { padding:120px 0; }
+    .bento { display:grid; grid-template-columns:repeat(12,1fr); gap:14px; }
+    .card { background:var(--color-surface); border:1px solid var(--color-subtle); border-radius:0; padding:32px; transition:border-color .25s; position:relative; overflow:hidden; }
+    .card:hover { border-color:var(--color-border); }
+    .card.c7{grid-column:span 7;} .card.c5{grid-column:span 5;} .card.c4{grid-column:span 4;} .card.c6{grid-column:span 6;}
+    .card.irl { border-color:var(--color-border); }
+    .card.irl::before { content:''; position:absolute; inset:0 0 auto; height:2px; background:var(--color-border); }
+    .card-icon { font-size:28px; margin-bottom:20px; display:block; }
+    .card-tag { font-family:var(--font-display); font-size:12px; font-weight:500; letter-spacing:.15em; text-transform:uppercase; color:var(--color-mid); margin-bottom:12px; }
+    .card-title { font-family:var(--font-display); font-size:24px; font-weight:500; letter-spacing:.01em; margin-bottom:14px; line-height:1.25; color:var(--color-white); }
+    .card-body { font-family:var(--font-body); font-size:15px; color:var(--color-light); line-height:1.75; }
+    .card-body strong { color:var(--color-white); font-weight:500; }
+    .card-body em { font-style:italic; color:var(--color-mid); }
+
+    /* Mycroft — Art Deco: heart of the brand, lavished. Surface-on-base panel, gold-framed, pull-quote motif */
+    .mycroft-section { padding:120px 0; }
+    .mycroft-inner { max-width:780px; margin:0 auto; padding:64px 56px; background:var(--color-surface); border:2px solid var(--color-border); border-radius:0; position:relative; overflow:hidden; }
+    .mycroft-inner::after { content:''; position:absolute; top:-60px; right:-60px; width:280px; height:280px; background:radial-gradient(circle,rgba(212,175,55,.06) 0%,transparent 65%); pointer-events:none; }
+    .mycroft-kicker { font-family:var(--font-display); font-size:14px; font-weight:500; letter-spacing:.15em; text-transform:uppercase; color:var(--color-mid); margin-bottom:22px; text-align:center; }
+    .mycroft-title { font-family:var(--font-display); font-weight:500; font-size:clamp(28px,3.5vw,40px); letter-spacing:.015em; line-height:1.15; margin-bottom:32px; color:var(--color-white); text-align:center; }
+    .mycroft-body { font-family:var(--font-body); font-size:16px; color:var(--color-light); line-height:1.8; display:flex; flex-direction:column; gap:18px; position:relative; z-index:1; }
+    /* Final paragraph in body becomes the pull-quote motif treatment */
+    .mycroft-body p:last-child { font-family:var(--font-display); font-style:italic; font-size:20px; font-weight:400; color:var(--color-mid); text-align:center; padding:24px 0; margin:16px 0 0; border-top:1px solid var(--color-border); border-bottom:1px solid var(--color-border); line-height:1.5; }
+    .mycroft-sig { font-family:var(--font-display); font-size:12px; font-weight:500; letter-spacing:.12em; text-transform:uppercase; color:var(--color-mid); margin-top:32px; padding-top:24px; border-top:1px solid var(--color-subtle); text-align:center; }
+
+    /* Workflow — 4-step numbered grid + Catapult callout */
+    .workflow { padding:0 0 120px; }
+    .workflow-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:24px; margin-bottom:64px; }
+    .workflow-step { background:var(--color-surface); border:1px solid var(--color-subtle); padding:36px 28px; border-radius:0; transition:border-color .25s; position:relative; }
+    .workflow-step:hover { border-color:var(--color-border); }
+    .step-num { display:block; font-family:var(--font-display); font-size:48px; font-weight:600; color:var(--color-border); line-height:1; margin-bottom:24px; letter-spacing:.02em; }
+    .step-title { font-family:var(--font-display); font-size:20px; font-weight:500; color:var(--color-white); margin-bottom:14px; line-height:1.25; letter-spacing:.01em; }
+    .step-body { font-family:var(--font-body); font-size:15px; color:var(--color-light); line-height:1.7; }
+
+    /* Catapult callout — gold-framed pressure-test pitch below the workflow grid */
+    .catapult-callout { max-width:780px; margin:0 auto; padding:40px 48px; background:var(--color-base); border:2px solid var(--color-border); border-radius:0; text-align:center; position:relative; }
+    .callout-eyebrow { font-family:var(--font-display); font-size:13px; font-weight:500; letter-spacing:.15em; text-transform:uppercase; color:var(--color-mid); margin-bottom:14px; }
+    .callout-title { font-family:var(--font-display); font-style:italic; font-size:24px; font-weight:500; color:var(--color-white); margin-bottom:14px; line-height:1.3; letter-spacing:.01em; }
+    .callout-body { font-family:var(--font-body); font-size:16px; color:var(--color-light); line-height:1.7; max-width:580px; margin:0 auto; }
+
+    /* Zoom-hint shared by .scenario-image and .lightbox */
+    .zoom-hint { position:absolute; top:12px; right:12px; background:rgba(0,0,0,.7); color:var(--color-light); font-family:var(--font-display); font-size:10px; font-weight:500; letter-spacing:.1em; text-transform:uppercase; padding:5px 10px; border-radius:0; opacity:0; transition:opacity .2s; pointer-events:none; }
+
+    /* Gallery — horizontal scroll-snap strip with gold-framed exhibits and italic Cinzel captions */
+    .gallery { padding:0 0 120px; }
+    .gallery-strip { display:flex; gap:32px; overflow-x:auto; scroll-snap-type:x mandatory; padding:8px 40px 24px; scroll-padding-left:40px; scroll-behavior:smooth; -webkit-overflow-scrolling:touch; }
+    .gallery-strip::-webkit-scrollbar { height:6px; }
+    .gallery-strip::-webkit-scrollbar-track { background:var(--color-base); }
+    .gallery-strip::-webkit-scrollbar-thumb { background:var(--color-subtle); }
+    .gallery-strip::-webkit-scrollbar-thumb:hover { background:var(--color-border); }
+    .gallery-item { flex:0 0 clamp(320px, 75vw, 720px); scroll-snap-align:start; margin:0; }
+    /* Uniform aspect ratio across tiles — images letterbox within the gold frame so captions stay aligned */
+    .gallery-figure { border:1px solid var(--color-border); background:var(--color-surface); padding:4px; aspect-ratio:16 / 10; overflow:hidden; transition:border-color .25s; cursor:zoom-in; position:relative; }
+    .gallery-figure:hover { border-color:var(--color-white); }
+    .gallery-figure img { display:block; width:100%; height:100%; object-fit:contain; }
+    .gallery-caption { font-family:var(--font-display); font-style:italic; font-size:16px; color:var(--color-mid); text-align:center; padding:18px 12px 0; line-height:1.4; letter-spacing:.01em; min-height:2.8em; }
+
+    /* Gallery navigation — gold sharp-corner arrows for click users */
+    .gallery-controls { display:flex; gap:12px; justify-content:center; margin-top:24px; }
+    .gallery-btn { background:transparent; color:var(--color-border); border:1px solid var(--color-border); width:44px; height:44px; font-family:var(--font-display); font-size:22px; cursor:pointer; transition:background .2s,color .2s; border-radius:0; padding:0; display:inline-flex; align-items:center; justify-content:center; line-height:1; }
+    .gallery-btn:hover { background:var(--color-border); color:var(--color-dark); }
+
+    /* SCENARIOS — Art Deco: alternating rows with gold-framed screenshots and Cinzel italic headlines */
+    .scenarios { padding:120px 0; }
+    .scenario-row { display:grid; grid-template-columns:1.4fr 1fr; gap:64px; align-items:center; margin-bottom:96px; }
+    .scenario-row:last-child { margin-bottom:0; }
+    .scenario-row:nth-child(even) .scenario-image { order:2; }
+    .scenario-image { position:relative; border:1px solid var(--color-border); border-radius:0; overflow:hidden; background:var(--color-surface); cursor:zoom-in; transition:border-color .25s; padding:4px; }
+    .scenario-image:hover { border-color:var(--color-white); }
+    .scenario-image img { display:block; width:100%; height:auto; }
+
+    .scenario-text { padding:0 8px; }
+    .scenario-tag { font-family:var(--font-display); font-size:13px; font-weight:500; color:var(--color-mid); letter-spacing:.15em; margin-bottom:20px; text-transform:uppercase; }
+    .scenario-headline { font-family:var(--font-display); font-weight:500; font-style:italic; font-size:clamp(22px,2.6vw,32px); line-height:1.2; letter-spacing:.01em; margin-bottom:18px; color:var(--color-white); }
+    .scenario-copy { font-family:var(--font-body); font-size:16px; color:var(--color-light); line-height:1.75; }
+    .scenario-copy em { font-style:italic; color:var(--color-mid); }
+
+    /* Lightbox — Art Deco: gold-framed museum exhibit */
+    .lightbox { display:none; position:fixed; inset:0; z-index:999; background:rgba(6,12,26,.96); cursor:zoom-out; align-items:center; justify-content:center; padding:32px; }
+    .lightbox.active { display:flex; }
+    .lightbox img { max-width:100%; max-height:92vh; border:1px solid var(--color-border); border-radius:0; padding:4px; background:var(--color-surface); cursor:default; }
+    .lightbox-close { position:absolute; top:20px; right:28px; color:var(--color-mid); font-family:var(--font-display); font-size:32px; line-height:1; cursor:pointer; transition:color .2s; user-select:none; }
+    .lightbox-close:hover { color:var(--color-white); }
+    .lightbox-hint { position:absolute; bottom:24px; left:50%; transform:translateX(-50%); font-family:var(--font-display); font-size:11px; color:var(--color-mid); letter-spacing:.15em; text-transform:uppercase; pointer-events:none; }
+
+    /* Pricing — Art Deco: highest-emphasis frame, 2px gold border, massive Cinzel price */
+    .pricing { padding:120px 0; }
+    .pricing-inner { max-width:480px; margin:0 auto; }
+    .price-card { background:var(--color-surface); border:2px solid var(--color-border); border-radius:0; padding:52px; position:relative; overflow:hidden; }
+    .price-label { font-family:var(--font-display); font-size:13px; font-weight:500; letter-spacing:.15em; text-transform:uppercase; color:var(--color-mid); margin-bottom:24px; text-align:center; }
+    .price-amount { font-family:var(--font-display); font-weight:600; font-size:80px; line-height:1; margin-bottom:12px; color:var(--color-border); text-align:center; letter-spacing:.01em; }
+    .price-amount sup { font-size:36px; vertical-align:super; font-weight:500; }
+    .price-note { font-family:var(--font-display); font-size:13px; letter-spacing:.12em; text-transform:uppercase; color:var(--color-mid); margin-bottom:14px; text-align:center; }
+    .price-tanstaafl { font-family:var(--font-body); font-size:14px; color:var(--color-light); margin-bottom:40px; line-height:1.6; text-align:center; }
+    .price-tanstaafl em { font-style:italic; color:var(--color-mid); }
+    .price-features { list-style:none; display:flex; flex-direction:column; gap:14px; margin-bottom:40px; }
+    .price-features li { display:flex; align-items:flex-start; gap:14px; font-family:var(--font-body); font-size:15px; color:var(--color-light); line-height:1.55; }
+    .price-features li::before { content:'✓'; color:var(--color-border); font-weight:600; flex-shrink:0; font-family:var(--font-display); font-size:16px; line-height:1.4; }
+    .btn-buy { display:block; width:100%; background:var(--color-border); color:var(--color-dark); font-family:var(--font-display); font-weight:500; font-size:16px; letter-spacing:.08em; text-transform:uppercase; padding:18px; border-radius:0; border:1px solid var(--color-border); cursor:pointer; text-align:center; transition:background .2s,color .2s; text-decoration:none; }
+    .btn-buy:hover { background:var(--color-white); color:var(--color-base); }
+    .price-refund { text-align:center; font-family:var(--font-body); font-size:13px; color:var(--color-muted); margin-top:14px; line-height:1.5; }
+    .price-fine { text-align:center; font-family:var(--font-display); font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--color-mid); margin-top:10px; }
+
+    /* FAQ — Art Deco: Cinzel questions, slate dividers, gold chevron */
+    .faq-section { padding:120px 0; }
+    .faq-inner { max-width:720px; margin:0 auto; padding:0 40px; }
+    .faq-list { margin-top:64px; }
+    .faq-item { border-bottom:1px solid var(--color-subtle); }
+    .faq-item:first-child { border-top:1px solid var(--color-subtle); }
+    .faq-q { width:100%; background:none; border:none; color:var(--color-white); font-family:var(--font-display); font-size:17px; font-weight:500; letter-spacing:.02em; text-align:left; padding:26px 0; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:16px; transition:color .2s; }
+    .faq-q:hover { color:var(--color-border); }
+    .faq-chevron { flex-shrink:0; width:18px; height:18px; transition:transform .3s, color .2s; color:var(--color-border); }
+    .faq-item.open .faq-chevron { transform:rotate(180deg); }
+    .faq-a { max-height:0; overflow:hidden; transition:max-height .38s cubic-bezier(.4,0,.2,1); }
+    .faq-item.open .faq-a { max-height:480px; }
+    .faq-a-inner { padding-bottom:26px; font-family:var(--font-body); font-size:15px; color:var(--color-light); line-height:1.78; }
+    .faq-a-inner a { color:var(--color-yellow); border-bottom:1px solid transparent; transition:border-color .2s; }
+    .faq-a-inner a:hover { border-bottom-color:var(--color-yellow); }
+
+    /* Final CTA — Art Deco: closer with Cinzel italic weaving emphasis */
+    .final-cta { padding:128px 40px 140px; text-align:center; position:relative; overflow:hidden; }
+    .final-cta::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at center 40%,rgba(212,175,55,.06) 0%,transparent 60%); pointer-events:none; }
+    .final-cta h2 { font-family:var(--font-display); font-weight:500; font-size:clamp(32px,5vw,48px); letter-spacing:.015em; line-height:1.2; max-width:680px; margin:0 auto 40px; color:var(--color-white); }
+    .final-cta h2 em { font-style:italic; color:var(--color-yellow); font-weight:500; }
+    .final-cta-sub { margin-top:24px; font-family:var(--font-display); font-size:12px; font-weight:500; letter-spacing:.15em; text-transform:uppercase; color:var(--color-mid); }
+
+    /* Footer — Art Deco: gold top rule, Cinzel wordmark, gold inline links */
+    footer { border-top:1px solid var(--color-border); padding:40px 44px; display:flex; align-items:center; justify-content:space-between; font-family:var(--font-body); font-size:13px; color:var(--color-muted); position:relative; z-index:1; flex-wrap:wrap; gap:20px; }
+    footer a { color:var(--color-yellow); border-bottom:1px solid transparent; transition:border-color .2s; }
+    footer a:hover { border-bottom-color:var(--color-yellow); }
+    .footer-left { display:flex; flex-direction:column; gap:6px; }
+    .footer-tagline { font-family:var(--font-body); font-size:12px; color:var(--color-muted); letter-spacing:0; }
+    .footer-right { display:flex; align-items:center; gap:24px; }
+
+    /* Trust-signal cluster — three brand promises rendered as gold-icon + eyebrow label, anchored below hero CTA */
+    .trust-cluster { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; max-width:640px; margin:56px auto 0; animation:fadeUp .65s .4s ease both; }
+    .trust-item { display:flex; flex-direction:column; align-items:center; gap:10px; text-align:center; }
+    .trust-icon { width:28px; height:28px; color:var(--color-border); flex-shrink:0; }
+    .trust-label { font-family:var(--font-display); font-size:12px; font-weight:500; letter-spacing:.15em; text-transform:uppercase; color:var(--color-mid); line-height:1.4; }
+
+    /* Ornamental section dividers — thin gold rules flanking a diamond mark */
+    .ornamental-divider { display:flex; align-items:center; justify-content:center; gap:18px; max-width:480px; margin:0 auto; padding:48px 24px; position:relative; z-index:1; }
+    .ornamental-rule-left, .ornamental-rule-right { flex:1; height:1px; background:var(--color-border); opacity:.65; }
+    .ornamental-mark { width:14px; height:14px; flex-shrink:0; color:var(--color-border); transform:rotate(45deg); }
+
+    /* Reveal */
+    .reveal { opacity:0; transform:translateY(22px); transition:opacity .65s ease,transform .65s ease; }
+    .reveal.visible { opacity:1; transform:translateY(0); }
+    .delay-1{transition-delay:.1s;} .delay-2{transition-delay:.2s;} .delay-3{transition-delay:.3s;}
+    @keyframes fadeUp { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:translateY(0)} }
+
+    /* Responsive */
+    @media(max-width:900px){
+      .card.c7,.card.c5,.card.c4,.card.c6{grid-column:span 12;}
+      .workflow-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .scenario-row { grid-template-columns:1fr; gap:32px; margin-bottom:72px; }
+      .scenario-row:nth-child(even) .scenario-image { order:0; }
+      .scenario-text { padding:0; }
+      .trust-cluster { gap:20px; max-width:480px; }
+      .engines-grid { grid-template-columns:1fr; gap:20px; max-width:520px; }
+    }
+    @media(max-width:680px){
+      .container, .container-wide { padding:0 24px; }
+      nav,nav.scrolled{padding-left:24px;padding-right:24px;}
+      .hero{padding:120px 24px 60px;}
+      .engines-bar { padding:72px 0; }
+      .engine-card { padding:32px 28px; }
+      .engine-name { font-size:40px; }
+      footer{flex-direction:column;gap:16px;padding:32px 24px;text-align:center;}
+      .footer-right{justify-content:center;}
+      .faq-inner{padding:0 24px;}
+      .final-cta{padding:80px 24px 100px;}
+      .mycroft-section{padding:80px 0;}
+      .mycroft-inner{padding:40px 28px;}
+      .mycroft-body p:last-child{font-size:17px;padding:20px 0;}
+      .pricing{padding:80px 0;}
+      .workflow{padding:80px 0;}
+      .workflow-grid { grid-template-columns:1fr; gap:16px; }
+      .workflow-step { padding:28px 24px; }
+      .step-num { font-size:40px; margin-bottom:18px; }
+      .catapult-callout { padding:32px 24px; }
+      .gallery { padding:0 0 80px; }
+      .gallery-strip { gap:20px; padding:8px 24px 20px; scroll-padding-left:24px; }
+      .gallery-caption { font-size:15px; padding:14px 8px 0; }
+      .price-card{padding:36px 28px;}
+      .price-amount{font-size:64px;}
+      .price-amount sup{font-size:28px;}
+      .features{padding:80px 0;}
+      .scenarios{padding:80px 0;}
+      .faq-section{padding:80px 0;}
+      .trust-cluster{grid-template-columns:1fr;gap:24px;margin-top:40px;}
+      .ornamental-divider{padding:32px 24px;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─────────────────────────── NAV ─────────────────────────── -->
+<nav id="main-nav">
+  <a href="/" class="logo">
+    <img src="./assets/icon.png" style="width:34px;height:34px;display:block" alt="What-If Weaver icon" />
+    What-If Weaver
+  </a>
+  <!-- TODO: replace href="#pricing" with LemonSqueezy checkout URL -->
+  <a href="#pricing" class="btn-nav">Buy Now — $29</a>
+</nav>
+
+<!-- ─────────────────────────── HERO ─────────────────────────── -->
+<section class="hero">
+  <div class="hero-kicker">
+    <span class="kicker-dot"></span>
+    For people who ask "but what if…"
+  </div>
+  <h1>Every <em>What-If</em>,<br>answered.</h1>
+
+  <div class="whatif-stack">
+    <span>What-If you got that promotion?</span>
+    <span>What-If you financed that car?</span>
+    <span>What-If you waited two years and paid cash?</span>
+    <span>What-If you won that Bat'leth tournament on Kaylon 5?</span>
+    <span>What-If you YOLO'd your savings into meme stocks and Pokémon cards?</span>
+  </div>
+  <p class="mycroft-tagline">
+    Mycroft can't tell you what to do.<br>
+    <strong>But he can tell you what will happen if you do.</strong>
+  </p>
+
+  <div class="hero-cta-row">
+    <!-- TODO: replace href="#pricing" with LemonSqueezy checkout URL -->
+    <a href="#pricing" class="btn-primary">
+      Get What-If Weaver
+      <span class="price-badge">$29</span>
+    </a>
+    <span class="hero-meta">Windows · One-time · No subscription</span>
+  </div>
+
+  <div class="trust-cluster" aria-label="Brand promises">
+    <div class="trust-item">
+      <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <rect x="5" y="11" width="14" height="9"/>
+        <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+      </svg>
+      <span class="trust-label">Local-first · No cloud</span>
+    </div>
+    <div class="trust-item">
+      <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <circle cx="12" cy="12" r="9"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+      <span class="trust-label">Not AI</span>
+    </div>
+    <div class="trust-item">
+      <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <circle cx="12" cy="12" r="8"/>
+        <line x1="12" y1="7" x2="12" y2="17" stroke-width="2"/>
+        <path d="M14.5 10a2.5 2.5 0 0 0-5 0c0 1.5 1 2 2.5 2s2.5.5 2.5 2a2.5 2.5 0 0 1-5 0"/>
+      </svg>
+      <span class="trust-label">$29 · One-time</span>
+    </div>
+  </div>
+
+  <div class="preview-wrap">
+    <div class="app-frame" data-screenshot="./assets/screenshots/alex-weave.png">
+      <div class="window-bar">
+        <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+        <span class="window-title">What-If Weaver  ·  ✨ Weave  ·  Alex — Full Life Arc</span>
+      </div>
+      <img class="app-screenshot" src="./assets/screenshots/alex-weave.png"
+           alt="What-If Weaver Weave view — four 40-year projection scenarios overlaid on one chart" />
+    </div>
+  </div>
+</section>
+
+<div class="ornamental-divider" aria-hidden="true">
+  <span class="ornamental-rule-left"></span>
+  <svg class="ornamental-mark" viewBox="0 0 14 14" fill="currentColor"><rect width="14" height="14"/></svg>
+  <span class="ornamental-rule-right"></span>
+</div>
+
+<!-- ─────────────────────────── ENGINES ─────────────────────────── -->
+<section class="engines-bar">
+  <div class="container">
+    <div class="sec-header reveal">
+      <p class="sec-kicker">Under the hood</p>
+      <h2 class="sec-title">Two engines.</h2>
+      <p class="sec-sub">One projects what's known. The other models what isn't.</p>
+    </div>
+    <div class="engines-grid reveal">
+      <div class="engine-card">
+        <p class="engine-tag">Deterministic</p>
+        <h3 class="engine-name">Mycroft</h3>
+        <p class="engine-subtitle">The projection engine.</p>
+        <p class="engine-body">A discrete-time, vector-state simulation engine that routes chronological cash flows through prioritized liquidity waterfalls — charting a household's multi-decade trajectory toward either compound accumulation or cascading financial ruin.</p>
+      </div>
+      <div class="engine-card">
+        <p class="engine-tag">Stochastic</p>
+        <h3 class="engine-name">Catapult</h3>
+        <p class="engine-subtitle">The event engine.</p>
+        <p class="engine-body">A stochastic event-generating engine that simulates pseudo-random financial volatility.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────────── FEATURES ─────────────────────────── -->
+<section class="features">
+  <div class="container">
+    <div class="sec-header reveal">
+      <p class="sec-kicker">How it works</p>
+      <h2 class="sec-title">Your finances.<br>Every possibility.</h2>
+      <p class="sec-sub">Every angle on your financial life — and every branching future you can imagine.</p>
+    </div>
+    <div class="bento">
+
+      <div class="card c7 irl reveal">
+        <span class="card-icon">🟡</span>
+        <p class="card-tag">IRL</p>
+        <h3 class="card-title">What if you'd done it differently?</h3>
+        <p class="card-body">Start with your actual financial life — accounts, income, expenses, debts. Your <strong>IRL</strong> baseline is the gold line: where you actually are, not where you hope to be. Everything else branches from here.</p>
+      </div>
+
+      <div class="card c5 reveal delay-1">
+        <span class="card-icon">🔀</span>
+        <p class="card-tag">What-Ifs</p>
+        <h3 class="card-title">Branch any decision, compare all futures</h3>
+        <p class="card-body">Create parallel scenarios from your IRL baseline. Retire at 45 or 67. Buy the house or keep renting. Take the promotion or start the business. See the dollar difference, across decades, on one chart.</p>
+      </div>
+
+      <div class="card c4 reveal">
+        <span class="card-icon">🌪</span>
+        <p class="card-tag">Plot Twists</p>
+        <h3 class="card-title">Model the curveballs.</h3>
+        <p class="card-body">Raises, layoffs, kids, mortgages, divorces, retirements. Every life event is a plot twist that shifts the trajectory. Add them to any scenario and watch the ripple propagate across decades.</p>
+      </div>
+
+      <div class="card c4 reveal delay-1">
+        <span class="card-icon">🎯</span>
+        <p class="card-tag">Catapult</p>
+        <h3 class="card-title">Pressure-test the plan.</h3>
+        <p class="card-body">The stochastic event engine throws unexpected life events at any scenario — job losses, market shocks, surprise expenses. You see whether the plan still holds.</p>
+      </div>
+
+      <div class="card c4 reveal delay-2">
+        <span class="card-icon">📈</span>
+        <p class="card-tag">Weave</p>
+        <h3 class="card-title">The future is fuzzy. Embrace it.</h3>
+        <p class="card-body">Mycroft runs 500 simulations on every projection, modeling the range of likely outcomes — not just the rosy one. Volatility drag included. (Yes, that's real.) All futures on one chart.</p>
+      </div>
+
+      <div class="card c4 reveal">
+        <span class="card-icon">✨</span>
+        <p class="card-tag">Dreams</p>
+        <h3 class="card-title">63 milestones across five tiers</h3>
+        <p class="card-body"><em>Lived the Dream</em> rewards real IRL progress. <em>Weaver Dreams</em> rewards planning depth. From Daydreamer to Legend. No confetti for doing nothing.</p>
+      </div>
+
+      <div class="card c4 reveal delay-1">
+        <span class="card-icon">🔒</span>
+        <p class="card-tag">Local-First</p>
+        <h3 class="card-title">Your numbers stay yours.</h3>
+        <p class="card-body">Everything runs on your machine. No cloud sync, no account required, no telemetry. The only thing that leaves your device is your license activation — a brief handshake, nothing more.</p>
+      </div>
+
+      <div class="card c4 reveal delay-2">
+        <span class="card-icon">📄</span>
+        <p class="card-tag">Export</p>
+        <h3 class="card-title">Show your work.</h3>
+        <p class="card-body">Export a polished PDF report for your spouse, your advisor, or yourself in five years when you've forgotten the math. Pop the chart to a second monitor for Zoom calls. Mycroft signs every page.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="ornamental-divider" aria-hidden="true">
+  <span class="ornamental-rule-left"></span>
+  <svg class="ornamental-mark" viewBox="0 0 14 14" fill="currentColor"><rect width="14" height="14"/></svg>
+  <span class="ornamental-rule-right"></span>
+</div>
+
+<!-- ─────────────────────────── MYCROFT ─────────────────────────── -->
+<section class="mycroft-section">
+  <div class="container">
+    <div class="mycroft-inner reveal">
+      <p class="mycroft-kicker">The Engine Has a Name</p>
+      <h2 class="mycroft-title">His name is Mycroft.<br>He's not AI.</h2>
+      <div class="mycroft-body">
+        <p>He doesn't connect to the internet. He doesn't call home. All the math — every simulation, every projection, every sensitivity analysis — runs on your machine, with your numbers, in private.</p>
+        <p>What Mycroft does, very well, is take those numbers and tell you where they go. Five years. Ten years. Forty. Every assumption visible. Every result auditable. No cloud, no accounts, no "just trust the algorithm."</p>
+        <p>Mycroft notices when your credit cards grow faster than your income. He notices when your savings rate won't get you to retirement on time. He notices when cash has been sitting idle long enough to cost you something. He notices when a spending habit is quietly doing more damage than it looks like on any given month.</p>
+        <p>He doesn't judge any of it. But he notices.</p>
+      </div>
+      <p class="mycroft-sig">Mycroft Engine · TANSTAAFL Labs · Computed locally on your machine</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────────── WORKFLOW ─────────────────────────── -->
+<section class="workflow">
+  <div class="container-wide">
+    <div class="sec-header reveal">
+      <p class="sec-kicker">How it works</p>
+      <h2 class="sec-title">From your numbers<br>to every future.</h2>
+      <p class="sec-sub">Four steps to a financial picture you can interrogate — and a stochastic engine for the futures you didn't see coming.</p>
+    </div>
+
+    <div class="workflow-grid reveal">
+      <div class="workflow-step">
+        <span class="step-num">01</span>
+        <h3 class="step-title">Build your IRL.</h3>
+        <p class="step-body">Load your accounts and cash flow. Mycroft starts where you actually are — not where you hope to be.</p>
+      </div>
+      <div class="workflow-step">
+        <span class="step-num">02</span>
+        <h3 class="step-title">Add the life events you know.</h3>
+        <p class="step-body">College, the next car, a planned retirement. The known plot points of the next decade — placed on the timeline at the years you expect them.</p>
+      </div>
+      <div class="workflow-step">
+        <span class="step-num">03</span>
+        <h3 class="step-title">Let Mycroft project your future.</h3>
+        <p class="step-body">Forty years of trajectory. Every assumption visible. Every result auditable. No cloud, no advisor, no "trust the algorithm."</p>
+      </div>
+      <div class="workflow-step">
+        <span class="step-num">04</span>
+        <h3 class="step-title">Ask 1,000 What-Ifs.</h3>
+        <p class="step-body">Branch any decision. Mycroft replays forty years for each path and plots them side by side on one chart. Then ask again. And again.</p>
+      </div>
+    </div>
+
+    <div class="catapult-callout reveal">
+      <p class="callout-eyebrow">And when you want to break it</p>
+      <h3 class="callout-title">Catapult — the stochastic event engine.</h3>
+      <p class="callout-body">When you want to pressure-test a future, Catapult throws unexpected life events at it — job losses, market shocks, surprise expenses — until you see whether the plan still holds.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────────── GALLERY ─────────────────────────── -->
+<section class="gallery">
+  <div class="container-wide">
+    <div class="sec-header reveal">
+      <p class="sec-kicker">Inside the app</p>
+      <h2 class="sec-title">The interface,<br>frame by frame.</h2>
+      <p class="sec-sub">Scroll the strip. Click any frame to enlarge.</p>
+    </div>
+  </div>
+
+  <div class="gallery-strip reveal" tabindex="0" aria-label="Screenshot gallery — scroll to see more">
+
+    <figure class="gallery-item">
+      <div class="gallery-figure" data-screenshot="./assets/screenshots/add-your-accounts-to-build-your-irl.png">
+        <img src="./assets/screenshots/add-your-accounts-to-build-your-irl.png" alt="Accounts setup screen for building your real-life baseline" />
+      </div>
+      <figcaption class="gallery-caption">Add your accounts to build your IRL.</figcaption>
+    </figure>
+
+    <figure class="gallery-item">
+      <div class="gallery-figure" data-screenshot="./assets/screenshots/model-your-income-and-expenses.png">
+        <img src="./assets/screenshots/model-your-income-and-expenses.png" alt="Income and expense modeling interface" />
+      </div>
+      <figcaption class="gallery-caption">Model your income and expenses.</figcaption>
+    </figure>
+
+    <figure class="gallery-item">
+      <div class="gallery-figure" data-screenshot="./assets/screenshots/add-in-known-life-events-you-can-speculate-later.png">
+        <img src="./assets/screenshots/add-in-known-life-events-you-can-speculate-later.png" alt="Life event entry showing known plot points placed on the timeline" />
+      </div>
+      <figcaption class="gallery-caption">Add the life events you already know. Speculate on the rest later.</figcaption>
+    </figure>
+
+    <figure class="gallery-item">
+      <div class="gallery-figure" data-screenshot="./assets/screenshots/details-matter-model-complex-income-and-investment-scenarios-easily.png">
+        <img src="./assets/screenshots/details-matter-model-complex-income-and-investment-scenarios-easily.png" alt="Detailed income and investment scenario configuration" />
+      </div>
+      <figcaption class="gallery-caption">Details matter — model complex income and investment scenarios easily.</figcaption>
+    </figure>
+
+    <figure class="gallery-item">
+      <div class="gallery-figure" data-screenshot="./assets/screenshots/see-your-financial-future.png">
+        <img src="./assets/screenshots/see-your-financial-future.png" alt="Multi-decade financial projection chart" />
+      </div>
+      <figcaption class="gallery-caption">See your financial future.</figcaption>
+    </figure>
+
+    <figure class="gallery-item">
+      <div class="gallery-figure" data-screenshot="./assets/screenshots/compare-as-many-what-ifs-as-you-want.png">
+        <img src="./assets/screenshots/compare-as-many-what-ifs-as-you-want.png" alt="Multiple What-If scenarios plotted side by side" />
+      </div>
+      <figcaption class="gallery-caption">Compare as many What-Ifs as you want.</figcaption>
+    </figure>
+
+    <figure class="gallery-item">
+      <div class="gallery-figure" data-screenshot="./assets/screenshots/per-scenario-model-tweaks.png">
+        <img src="./assets/screenshots/per-scenario-model-tweaks.png" alt="Per-scenario model parameter tweaks panel" />
+      </div>
+      <figcaption class="gallery-caption">Per-scenario model tweaks.</figcaption>
+    </figure>
+
+    <figure class="gallery-item">
+      <div class="gallery-figure" data-screenshot="./assets/screenshots/find-your-debt-free-day.png">
+        <img src="./assets/screenshots/find-your-debt-free-day.png" alt="Debt-free date projection visualization" />
+      </div>
+      <figcaption class="gallery-caption">Find your debt-free day.</figcaption>
+    </figure>
+
+    <figure class="gallery-item">
+      <div class="gallery-figure" data-screenshot="./assets/screenshots/use-catapult-the-stochastic-event-engine-for-pressure-testing-your-finances.png">
+        <img src="./assets/screenshots/use-catapult-the-stochastic-event-engine-for-pressure-testing-your-finances.png" alt="Catapult stochastic event engine pressure-testing interface" />
+      </div>
+      <figcaption class="gallery-caption">Catapult — pressure-test any future.</figcaption>
+    </figure>
+
+    <figure class="gallery-item">
+      <div class="gallery-figure" data-screenshot="./assets/screenshots/update-irl-at-any-time-with-your-real-life-changes-and-watch-it-ripple-through-your-projections.png">
+        <img src="./assets/screenshots/update-irl-at-any-time-with-your-real-life-changes-and-watch-it-ripple-through-your-projections.png" alt="Live IRL update propagating through all projections" />
+      </div>
+      <figcaption class="gallery-caption">Update your IRL anytime. Watch it ripple through every projection.</figcaption>
+    </figure>
+
+    <figure class="gallery-item">
+      <div class="gallery-figure" data-screenshot="./assets/screenshots/generate-and-export-professional-looking-reports.png">
+        <img src="./assets/screenshots/generate-and-export-professional-looking-reports.png" alt="Professional PDF report export preview" />
+      </div>
+      <figcaption class="gallery-caption">Generate and export professional reports.</figcaption>
+    </figure>
+
+    <figure class="gallery-item">
+      <div class="gallery-figure" data-screenshot="./assets/screenshots/pop-out-as-many-windows-as-you-need-or-want.png">
+        <img src="./assets/screenshots/pop-out-as-many-windows-as-you-need-or-want.png" alt="Multiple pop-out windows across monitors" />
+      </div>
+      <figcaption class="gallery-caption">Pop out as many windows as you need.</figcaption>
+    </figure>
+
+  </div>
+
+  <div class="gallery-controls">
+    <button class="gallery-btn" data-dir="prev" aria-label="Previous screenshot">‹</button>
+    <button class="gallery-btn" data-dir="next" aria-label="Next screenshot">›</button>
+  </div>
+</section>
+
+<!-- ─────────────────────────── SCENARIOS ─────────────────────────── -->
+<section class="scenarios">
+  <div class="container">
+    <div class="sec-header reveal">
+      <p class="sec-kicker">What it shows you</p>
+      <h2 class="sec-title">The math,<br>on screen.</h2>
+      <p class="sec-sub">Six examples of what Mycroft surfaces once your numbers are in.</p>
+    </div>
+
+    <div class="scenario-row reveal">
+      <div class="scenario-image" data-screenshot="./assets/screenshots/disney-adults-death-spiral-flagged.png">
+        <img src="./assets/screenshots/disney-adults-death-spiral-flagged.png" alt="Dashboard with a red Credit Card Debt Spirals Detected warning box" />
+        <span class="zoom-hint" style="opacity:1">click to enlarge</span>
+      </div>
+      <div class="scenario-text">
+        <p class="scenario-tag">📊 Dashboard · Proactive debt warnings</p>
+        <p class="scenario-headline">He flagged it in red. He was polite about it.</p>
+        <p class="scenario-copy">When credit card balances start growing faster than income, Mycroft puts a red box on the Dashboard the moment you open the app. He prints his usual notice underneath: <em>"Mycroft notices. He doesn't judge. But he notices."</em></p>
+      </div>
+    </div>
+
+    <div class="scenario-row reveal">
+      <div class="scenario-image" data-screenshot="./assets/screenshots/disney-adults-weave-irl-in-trouble.png">
+        <img src="./assets/screenshots/disney-adults-weave-irl-in-trouble.png" alt="Weave chart showing IRL trending toward negative net worth for a couple making quarterly Disney trips" />
+        <span class="zoom-hint" style="opacity:1">click to enlarge</span>
+      </div>
+      <div class="scenario-text">
+        <p class="scenario-tag">✨ Weave · Recovery scenarios</p>
+        <p class="scenario-headline">When IRL trends the wrong way, the alternatives become obvious.</p>
+        <p class="scenario-copy">Plot two or three recovery paths against a baseline that's heading negative. Watch the dollar gap widen across the five-year horizon. The intervention scenario isn't always the obvious one — but it's always plotted, with the end-of-period numbers right underneath.</p>
+      </div>
+    </div>
+
+    <div class="scenario-row reveal">
+      <div class="scenario-image" data-screenshot="./assets/screenshots/what-if-i-actually-cooked.png">
+        <img src="./assets/screenshots/what-if-i-actually-cooked.png" alt="Weave chart showing IRL trending to negative 807K versus two recovery scenarios" />
+        <span class="zoom-hint" style="opacity:1">click to enlarge</span>
+      </div>
+      <div class="scenario-text">
+        <p class="scenario-tag">✨ Weave · Category-level analysis</p>
+        <p class="scenario-headline">Find the category that's quietly eating your future.</p>
+        <p class="scenario-copy">Trace a million-dollar trajectory difference back to a single spending bucket. The IRL line slumps to negative; one habit change recovers six figures; a full audit recovers seven. Same income, different choices, all plotted side by side.</p>
+      </div>
+    </div>
+
+    <div class="scenario-row reveal">
+      <div class="scenario-image" data-screenshot="./assets/screenshots/high-income-somehow-poor.png">
+        <img src="./assets/screenshots/high-income-somehow-poor.png" alt="Detailed What-Ifs and Plot Twists panel for a high-income couple with multiple car payments and lease ends" />
+        <span class="zoom-hint" style="opacity:1">click to enlarge</span>
+      </div>
+      <div class="scenario-text">
+        <p class="scenario-tag">🔀 Plot Twists · Long-form decision modeling</p>
+        <p class="scenario-headline">Make the pattern visible.</p>
+        <p class="scenario-copy">Map ten or twenty Plot Twists across a decade — promotions, leases, loans, payoffs, raises — and the rhythm hiding inside high income and low savings becomes obvious. Slide the right-hand parameters and the entire projection re-flows.</p>
+      </div>
+    </div>
+
+    <div class="scenario-row reveal">
+      <div class="scenario-image" data-screenshot="./assets/screenshots/what-if-i-pause-investing-and-nuke-the-credit-card.png">
+        <img src="./assets/screenshots/what-if-i-pause-investing-and-nuke-the-credit-card.png" alt="Purple themed Weave chart comparing minimum credit card payments versus aggressively paying off the card" />
+        <span class="zoom-hint" style="opacity:1">click to enlarge</span>
+      </div>
+      <div class="scenario-text">
+        <p class="scenario-tag">✨ Weave · 5-year horizon</p>
+        <p class="scenario-headline">Pause investing to kill the card, or keep going?</p>
+        <p class="scenario-copy">Two lines. One honest answer. Mycroft ran both — Minimum Payments ends at $64K, Nuke the Card ends at $66K — and the gap is smaller than you'd think. It's not always obvious which one wins, which is exactly the point.</p>
+      </div>
+    </div>
+
+    <div class="scenario-row reveal">
+      <div class="scenario-image" data-screenshot="./assets/screenshots/what-if-the-market-goes-flat-for-20-years.png">
+        <img src="./assets/screenshots/what-if-the-market-goes-flat-for-20-years.png" alt="Weave chart modeling a scenario where market returns are flat for two decades" />
+        <span class="zoom-hint" style="opacity:1">click to enlarge</span>
+      </div>
+      <div class="scenario-text">
+        <p class="scenario-tag">✨ Weave · Worst-case modeling</p>
+        <p class="scenario-headline">What if the market does nothing for twenty years?</p>
+        <p class="scenario-copy">Mycroft has thoughts. They are not optimistic. Drop the return assumption to zero, hold inflation steady, and watch the lines flatten. It's the question every honest planner asks and almost no plan answers. Now it does.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="ornamental-divider" aria-hidden="true">
+  <span class="ornamental-rule-left"></span>
+  <svg class="ornamental-mark" viewBox="0 0 14 14" fill="currentColor"><rect width="14" height="14"/></svg>
+  <span class="ornamental-rule-right"></span>
+</div>
+
+<!-- ─────────────────────────── PRICING ─────────────────────────── -->
+<section class="pricing" id="pricing">
+  <div class="container">
+    <div class="sec-header reveal">
+      <p class="sec-kicker">Pricing</p>
+      <h2 class="sec-title">Own it forever.</h2>
+    </div>
+    <div class="pricing-inner">
+      <div class="price-card reveal">
+        <p class="price-label">What-If Weaver · Full License</p>
+        <div class="price-amount"><sup>$</sup>29</div>
+        <p class="price-note">One-time · Windows · License key via email</p>
+        <p class="price-tanstaafl">TANSTAAFL — <em>There Ain't No Such Thing As A Free Lunch</em>, except for the updates, which are.</p>
+        <ul class="price-features">
+          <li>The full workflow — nothing locked behind upgrades</li>
+          <li>Unlimited What-If scenarios and Plot Twists</li>
+          <li>12 bundled example files to help you get started</li>
+          <li>63 Dreams achievements across five tiers</li>
+          <li>PDF report export and multi-monitor presenter mode</li>
+          <li>Free updates for v1 of the app</li>
+          <li>Export &amp; import your data (.whatifweaver format)</li>
+          <li>License activates on one Windows machine</li>
+        </ul>
+        <!-- TODO: replace href with LemonSqueezy checkout URL -->
+        <a href="#" class="btn-buy">Buy Now — $29</a>
+        <p class="price-refund">30-day money-back guarantee · Cancel via email</p>
+        <p class="price-fine">Secure checkout via LemonSqueezy · Instant license key delivery</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────────── FAQ ─────────────────────────── -->
+<section class="faq-section">
+  <div class="faq-inner reveal">
+    <div class="sec-header">
+      <p class="sec-kicker">Questions</p>
+      <h2 class="sec-title" style="font-size:clamp(34px,3.5vw,50px)">Before you buy</h2>
+    </div>
+    <div class="faq-list">
+
+      <div class="faq-item">
+        <button class="faq-q">What's Mycroft?
+          <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">Mycroft is the projection engine inside What-If Weaver. He runs entirely on your machine — no internet connection required, no data leaving your device. He runs 500 Monte Carlo simulations on every projection, signs every PDF report, and notices things in your numbers that are easy to miss when you're living inside them. He's named after a supercomputer, which felt appropriate.</div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q">Is this a subscription?
+          <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">No. What-If Weaver is a one-time purchase. You pay once and own it permanently, including all future updates within v1. No subscription, no renewal, no monthly fee, no "we're raising prices" email in year two.</div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q">What platforms does it run on?
+          <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">Currently Windows only. What-If Weaver is a native desktop app — it runs entirely on your machine with no browser or web app required. No internet needed after activation.</div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q">Where is my financial data stored?
+          <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">Entirely on your machine. No cloud, no servers, no accounts required. All your numbers stay local. You can export everything to a <code>.whatifweaver</code> file anytime for backups or to move to a new machine.</div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q">How does the license key work?
+          <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">After purchase you receive a license key by email. Enter it on first launch to unlock the app on your Windows machine. Moving to a new PC? Use the Deactivate License button in the Settings tab — it frees the license immediately so you can activate on any new machine yourself.</div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q">Does this replace a financial advisor?
+          <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">No — and it's not trying to. What-If Weaver is a personal modeling tool for comparing scenarios. It produces projections and simulations, not personalized financial advice. What-If Weaver does the math. Your advisor does the judgment. Use both.</div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q">Do I need internet after I buy?
+          <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">Only for initial license activation and a brief background validation about once per month. The app itself — projections, charts, scenarios, everything — runs fully offline.</div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q">What's your refund policy?
+          <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">30-day money-back guarantee. If What-If Weaver isn't what you expected, email <a href="mailto:hello@whatifweaver.com">hello@whatifweaver.com</a> within 30 days for a full refund.</div></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="ornamental-divider" aria-hidden="true">
+  <span class="ornamental-rule-left"></span>
+  <svg class="ornamental-mark" viewBox="0 0 14 14" fill="currentColor"><rect width="14" height="14"/></svg>
+  <span class="ornamental-rule-right"></span>
+</div>
+
+<!-- ─────────────────────────── FINAL CTA ─────────────────────────── -->
+<section class="final-cta">
+  <h2 class="reveal">Stop wondering.<br>Start <em>weaving</em>.</h2>
+  <div class="reveal delay-1">
+    <!-- TODO: replace href with LemonSqueezy checkout URL -->
+    <a href="#pricing" class="btn-primary" style="margin-top:8px">
+      Get What-If Weaver
+      <span class="price-badge">$29</span>
+    </a>
+  </div>
+  <p class="reveal delay-2 final-cta-sub">
+    Windows · One-time purchase · Yours forever
+  </p>
+</section>
+
+<!-- ─────────────────────────── FOOTER ─────────────────────────── -->
+<footer>
+  <div class="footer-left">
+    <div class="logo" style="font-size:14px">
+      <img src="./assets/icon.png" style="width:26px;height:26px;display:block" alt="" />
+      What-If Weaver
+    </div>
+    <span class="footer-tagline">© 2026 TANSTAAFL Labs — There Ain't No Such Thing As A Free Lunch</span>
+  </div>
+  <div class="footer-right">
+    <img src="./assets/tanstaafl-labs.png" style="height:40px;opacity:0.6;display:block" alt="TANSTAAFL Labs" />
+    <!-- TODO: confirm hello@whatifweaver.com is live before launch -->
+    <a href="./privacy.html">Privacy Policy</a>
+    <span style="color:var(--color-subtle)">·</span>
+    <a href="mailto:hello@whatifweaver.com">Contact</a>
+  </div>
+</footer>
+
+<!-- ─────────────────────────── LIGHTBOX ─────────────────────────── -->
+<div id="lightbox" class="lightbox">
+  <span class="lightbox-close">×</span>
+  <img id="lightbox-img" src="" alt="" />
+  <span class="lightbox-hint">ESC or click to close</span>
+</div>
+
+<script>
+  // ──────── Lightbox ────────
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightbox-img');
+
+  // All elements that should open the lightbox have a data-screenshot attribute
+  document.querySelectorAll('[data-screenshot]').forEach(el => {
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      const src = el.getAttribute('data-screenshot');
+      const imgEl = el.querySelector('img');
+      lightboxImg.src = src;
+      lightboxImg.alt = imgEl ? imgEl.alt : '';
+      lightbox.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    });
+  });
+
+  const closeLightbox = () => {
+    lightbox.classList.remove('active');
+    document.body.style.overflow = '';
+  };
+  lightbox.addEventListener('click', closeLightbox);
+  lightboxImg.addEventListener('click', e => e.stopPropagation());
+  document.querySelector('.lightbox-close').addEventListener('click', closeLightbox);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+  // ──────── Gallery scroll controls ────────
+  const galleryStrip = document.querySelector('.gallery-strip');
+  if (galleryStrip) {
+    document.querySelectorAll('.gallery-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const item = galleryStrip.querySelector('.gallery-item');
+        if (!item) return;
+        const stepStyle = getComputedStyle(galleryStrip);
+        const gap = parseFloat(stepStyle.columnGap || stepStyle.gap || '0') || 0;
+        const stride = item.getBoundingClientRect().width + gap;
+        const dir = btn.dataset.dir === 'next' ? 1 : -1;
+        galleryStrip.scrollBy({ left: stride * dir, behavior: 'smooth' });
+      });
+    });
+  }
+
+  // ──────── Sticky nav ────────
+  const nav = document.getElementById('main-nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 48);
+  }, { passive: true });
+
+  // ──────── Scroll reveal ────────
+  const io = new IntersectionObserver(
+    entries => entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+    }),
+    { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
+  );
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // ──────── FAQ accordion ────────
+  document.querySelectorAll('.faq-q').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.faq-item');
+      const was = item.classList.contains('open');
+      document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+      if (!was) item.classList.add('open');
+    });
+  });
+</script>
+
+</body>
+</html>
