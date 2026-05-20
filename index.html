@@ -85,6 +85,9 @@
     .logo { display:flex; align-items:center; gap:12px; font-family:var(--font-display); font-weight:500; font-size:17px; letter-spacing:.04em; color:var(--color-white); }
     .btn-nav { background:var(--color-border); color:var(--color-dark); font-family:var(--font-display); font-weight:500; font-size:13px; letter-spacing:.08em; text-transform:uppercase; padding:10px 22px; border-radius:0; border:1px solid var(--color-border); cursor:pointer; transition:background .2s,color .2s; }
     .btn-nav:hover { background:var(--color-white); color:var(--color-base); }
+    .nav-right { display:flex; align-items:center; gap:24px; }
+    .nav-link { font-family:var(--font-display); font-size:13px; font-weight:500; letter-spacing:.08em; text-transform:uppercase; color:var(--color-mid); transition:color .2s; }
+    .nav-link:hover { color:var(--color-border); }
 
     /* Hero — Art Deco: bare eyebrow, monumental Cinzel H1, italic body sub-copy */
     .hero { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:148px 40px 80px; overflow:hidden; }
@@ -293,6 +296,7 @@
     @media(max-width:680px){
       .container, .container-wide { padding:0 24px; }
       nav,nav.scrolled{padding-left:24px;padding-right:24px;}
+      .nav-link{display:none;}
       .hero{padding:120px 24px 60px;}
       .engines-bar { padding:72px 0; }
       .engine-card { padding:32px 28px; }
@@ -332,7 +336,10 @@
     <img src="./assets/icon.png" style="width:34px;height:34px;display:block" alt="What-If Weaver icon" />
     What-If Weaver
   </a>
-  <a href="https://wiw.lemonsqueezy.com/checkout/buy/5d934a86-ed92-4833-9714-1a6a20193599?embed=1" class="btn-nav lemonsqueezy-button">Buy Now — $29</a>
+  <div class="nav-right">
+    <a href="/download" class="nav-link">Already have a license?</a>
+    <a href="https://wiw.lemonsqueezy.com/checkout/buy/5d934a86-ed92-4833-9714-1a6a20193599?embed=1" class="btn-nav lemonsqueezy-button">Buy Now — $29</a>
+  </div>
 </nav>
 
 <!-- ─────────────────────────── HERO ─────────────────────────── -->
@@ -891,6 +898,8 @@
   <div class="footer-right">
     <img src="./assets/tanstaafl-labs.png" style="height:40px;opacity:0.6;display:block" alt="TANSTAAFL Labs" />
     <!-- TODO: confirm hello@whatifweaver.com is live before launch -->
+    <a href="/download">Download</a>
+    <span style="color:var(--color-subtle)">·</span>
     <a href="./privacy.html">Privacy Policy</a>
     <span style="color:var(--color-subtle)">·</span>
     <a href="mailto:hello@whatifweaver.com">Contact</a>
